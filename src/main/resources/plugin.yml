@@ -1,0 +1,22 @@
+name: BranzWallet
+version: '${version}'
+main: dev.branzx.wallet.WalletPlugin
+api-version: '26.2'
+softdepend: [Vault]
+load: STARTUP
+author: BranzX3
+description: Central currency plugin — Coin (MMO economy, Vault) and Credit (premium, real-money)
+
+commands:
+  wallet:
+    description: Wallet main command (balance, link)
+    usage: /wallet [balance|link <code>]
+    aliases: [credit, coins]
+
+permissions:
+  wallet.admin:
+    description: Grant/adjust Coin and Credit, view ledgers
+    default: op
+  wallet.use:
+    description: Check own balance and link account
+    default: true

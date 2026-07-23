@@ -1,0 +1,36 @@
+# BranzWallet configuration.
+#
+# Coin  = MMO in-game currency, exposed to the whole network as the Vault economy.
+# Credit = premium currency bought with real money, integer, non-transferable.
+#
+# Both live in one shared database so any backend (survival, dungeons, ...) and
+# the Discord bot read and mutate the same authoritative rows.
+
+currency-name: "Coins"
+
+storage:
+  # 'mysql' for a real network (shared across backends + Discord bot),
+  # 'sqlite' for single-server local development only.
+  type: sqlite
+
+mysql:
+  host: localhost
+  port: 3306
+  database: idle
+  username: root
+  password: ""
+  useSSL: false
+  # Off by default: fetching the server key over plaintext trusts the first
+  # reply. Enable only on a trusted private network.
+  allow-public-key-retrieval: false
+  pool-size: 10
+
+credits:
+  # Hybrid Pay bounds (Coin checkout partly offset by Credit).
+  coin-offset-per-credit: 20
+  max-offset-percent: 15
+  season-offset-cap: 30000
+
+link:
+  # Minutes a /wallet link code stays valid after it is generated in-game.
+  code-ttl-minutes: 5
