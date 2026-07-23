@@ -55,6 +55,11 @@ final class WalletApiImpl implements WalletApi {
     }
 
     @Override
+    public java.util.List<dev.branzx.wallet.api.LeaderEntry> topCoins(int limit) {
+        return coins.top(limit);
+    }
+
+    @Override
     public long credits(UUID owner) {
         return credits.balance(owner);
     }

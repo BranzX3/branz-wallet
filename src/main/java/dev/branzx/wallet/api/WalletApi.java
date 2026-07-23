@@ -38,6 +38,9 @@ public interface WalletApi {
      */
     boolean addCoins(UUID owner, long amount);
 
+    /** Top {@code limit} accounts by Coin balance, highest first (for leaderboards). */
+    List<LeaderEntry> topCoins(int limit);
+
     // ---- Credit (premium currency) ----
 
     /** Current Credit balance of {@code owner}. */

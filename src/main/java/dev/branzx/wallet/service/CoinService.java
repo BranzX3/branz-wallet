@@ -1,5 +1,6 @@
 package dev.branzx.wallet.service;
 
+import dev.branzx.wallet.api.LeaderEntry;
 import dev.branzx.wallet.storage.WalletDatabase;
 import org.bukkit.plugin.Plugin;
 
@@ -7,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -82,6 +85,25 @@ public final class CoinService {
                 throw new SQLException("Insufficient Coins or missing account row");
             }
         }
+    }
+
+    /** Top {@code limit} accounts by Coin balance, highest first. */
+    public List<LeaderEntry> top(int limit) {
+        List<LeaderEntry> out = new ArrayList<>();
+        try (Connection connection = database.getConnection();
+             PreparedStatement select = connection.prepareStatement(
+                     "SELECT uuid, name, coins FROM wallet_accounts ORDER BY coins DESC LIMIT ?")) {
+            select.setInt(1, Math.max(1, Math.min(50, limit)));
+            try (ResultSet rs = select.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new LeaderEntry(UUID.fromString(rs.getString("uuid")),
+                            rs.getString("name"), rs.getLong("coins")));
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to read Coin leaderboard: " + e.getMessage());
+        }
+        return out;
     }
 
     private void ensureRow(Connection connection, UUID owner, String name) throws SQLException {
