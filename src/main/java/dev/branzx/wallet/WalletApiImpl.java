@@ -95,4 +95,9 @@ final class WalletApiImpl implements WalletApi {
     public UUID linkedUuid(String discordId) {
         return links.linkedUuid(discordId);
     }
+
+    @Override
+    public String discordIdFor(UUID owner) {
+        return links.discordIdFor(owner);
+    }
 }

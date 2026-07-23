@@ -105,4 +105,11 @@ public interface WalletApi {
 
     /** Minecraft UUID linked to {@code discordId}, or null if none. */
     UUID linkedUuid(String discordId);
+
+    /**
+     * Discord user id linked to {@code owner}, or null. The reverse of
+     * {@link #linkedUuid}; game-event handlers use it to DM a player. Blocking —
+     * call off the main server thread.
+     */
+    String discordIdFor(UUID owner);
 }

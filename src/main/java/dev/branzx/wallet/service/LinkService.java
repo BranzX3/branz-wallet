@@ -103,4 +103,23 @@ public final class LinkService {
             return null;
         }
     }
+
+    /**
+     * Discord user id linked to {@code owner}, or null. The reverse of
+     * {@link #linkedUuid} — game events use it to DM a player. Blocking; call
+     * off the main thread.
+     */
+    public String discordIdFor(UUID owner) {
+        try (Connection connection = database.getConnection();
+             PreparedStatement select = connection.prepareStatement(
+                     "SELECT discord_id FROM wallet_discord_link WHERE owner_uuid = ?")) {
+            select.setString(1, owner.toString());
+            try (ResultSet rs = select.executeQuery()) {
+                return rs.next() ? rs.getString("discord_id") : null;
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to read Discord id for " + owner + ": " + e.getMessage());
+            return null;
+        }
+    }
 }
