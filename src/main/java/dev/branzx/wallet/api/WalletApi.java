@@ -1,5 +1,6 @@
 package dev.branzx.wallet.api;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -51,6 +52,18 @@ public interface WalletApi {
      */
     boolean adjustCredit(UUID owner, long amount, String type,
                          String transactionId, String detail);
+
+    /**
+     * Records Coins a player earned this season, feeding the Hybrid Pay offset
+     * cap. Fire-and-forget; safe off the main thread.
+     */
+    void recordCoinsEarned(UUID owner, long amount);
+
+    /** Most recent Credit ledger entries for {@code owner}, newest first. */
+    List<LedgerEntry> creditHistory(UUID owner, int limit);
+
+    /** Drops any cached Credit snapshot for {@code owner} (call on join/quit). */
+    void invalidateCredit(UUID owner);
 
     /**
      * Pays a fixed-price Coin checkout, optionally offsetting part of it with

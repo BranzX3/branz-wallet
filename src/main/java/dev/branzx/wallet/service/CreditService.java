@@ -1,6 +1,7 @@
 package dev.branzx.wallet.service;
 
 import dev.branzx.wallet.api.Checkout;
+import dev.branzx.wallet.api.LedgerEntry;
 import dev.branzx.wallet.storage.WalletDatabase;
 import org.bukkit.plugin.Plugin;
 
@@ -8,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -189,6 +192,29 @@ public final class CreditService {
         invalidate(owner);
         plugin.getLogger().info("HYBRID_PAY " + owner + " coins=" + coinCost + " credits=" + credits);
         return new Checkout(true, "Paid " + coinCost + " Coins + " + credits + " Credits.", coinCost, credits);
+    }
+
+    /** Most recent ledger entries for {@code owner}, newest first. */
+    public List<LedgerEntry> historySync(UUID owner, int limit) {
+        List<LedgerEntry> entries = new ArrayList<>();
+        try (Connection connection = database.getConnection();
+             PreparedStatement select = connection.prepareStatement(
+                     "SELECT transaction_id, entry_type, amount, detail_json, created_at "
+                             + "FROM wallet_credit_ledger WHERE owner_uuid = ? "
+                             + "ORDER BY created_at DESC LIMIT ?")) {
+            select.setString(1, owner.toString());
+            select.setInt(2, Math.max(1, Math.min(100, limit)));
+            try (ResultSet rs = select.executeQuery()) {
+                while (rs.next()) {
+                    entries.add(new LedgerEntry(rs.getString("transaction_id"),
+                            rs.getString("entry_type"), rs.getLong("amount"),
+                            rs.getString("detail_json"), String.valueOf(rs.getTimestamp("created_at"))));
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to load Credit history: " + e.getMessage());
+        }
+        return entries;
     }
 
     // ---- wallet reads ----

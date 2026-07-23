@@ -1,11 +1,13 @@
 package dev.branzx.wallet;
 
 import dev.branzx.wallet.api.Checkout;
+import dev.branzx.wallet.api.LedgerEntry;
 import dev.branzx.wallet.api.WalletApi;
 import dev.branzx.wallet.service.CoinService;
 import dev.branzx.wallet.service.CreditService;
 import dev.branzx.wallet.service.LinkService;
 
+import java.util.List;
 import java.util.UUID;
 
 /** Thin adapter that exposes the internal services as the public {@link WalletApi}. */
@@ -40,6 +42,21 @@ final class WalletApiImpl implements WalletApi {
     public boolean adjustCredit(UUID owner, long amount, String type,
                                 String transactionId, String detail) {
         return credits.adjust(owner, amount, type, transactionId, detail);
+    }
+
+    @Override
+    public void recordCoinsEarned(UUID owner, long amount) {
+        credits.recordCoinsEarned(owner, amount);
+    }
+
+    @Override
+    public List<LedgerEntry> creditHistory(UUID owner, int limit) {
+        return credits.historySync(owner, limit);
+    }
+
+    @Override
+    public void invalidateCredit(UUID owner) {
+        credits.invalidate(owner);
     }
 
     @Override
