@@ -73,6 +73,27 @@ public interface WalletApi {
     Checkout hybridPay(UUID owner, long coinPrice, long requestedCredits,
                        String purchaseId, String idempotencyKey);
 
+    // ---- real-money top-up orders ----
+
+    /**
+     * Records a pending top-up order. {@code reference} is the caller's unique
+     * id (also the Credit ledger key on settlement); {@code amountSatang} is the
+     * real-money amount in satang. Returns false on bad input or a duplicate
+     * reference.
+     */
+    boolean createTopup(String reference, UUID owner, long credits,
+                        long amountSatang, String packageId);
+
+    /**
+     * Settles a top-up: marks it PAID and grants the Credit atomically.
+     * Idempotent — a replayed payment webhook returns {@code ALREADY_SETTLED}
+     * without granting again.
+     */
+    TopupSettlement settleTopup(String reference, String providerRef);
+
+    /** The top-up order for {@code reference}, or null if unknown. */
+    TopupInfo topup(String reference);
+
     // ---- account linking (Discord <-> Minecraft) ----
 
     /**

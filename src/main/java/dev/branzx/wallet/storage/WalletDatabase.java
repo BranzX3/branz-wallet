@@ -222,6 +222,19 @@ public final class WalletDatabase {
                 linked_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """,
+            """
+            CREATE TABLE IF NOT EXISTS wallet_topup (
+                reference VARCHAR(64) NOT NULL PRIMARY KEY,
+                owner_uuid VARCHAR(36) NOT NULL,
+                credits BIGINT NOT NULL,
+                amount_satang BIGINT NOT NULL,
+                package_id VARCHAR(32),
+                status VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+                provider_ref VARCHAR(64),
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                KEY idx_topup_owner (owner_uuid)
+            )
+            """,
     };
 
     private static final String[] SQLITE_DDL = {
@@ -264,6 +277,18 @@ public final class WalletDatabase {
                 discord_id TEXT NOT NULL PRIMARY KEY,
                 owner_uuid TEXT NOT NULL UNIQUE,
                 linked_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS wallet_topup (
+                reference TEXT NOT NULL PRIMARY KEY,
+                owner_uuid TEXT NOT NULL,
+                credits INTEGER NOT NULL,
+                amount_satang INTEGER NOT NULL,
+                package_id TEXT,
+                status TEXT NOT NULL DEFAULT 'PENDING',
+                provider_ref TEXT,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """,
     };

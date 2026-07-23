@@ -2,10 +2,13 @@ package dev.branzx.wallet;
 
 import dev.branzx.wallet.api.Checkout;
 import dev.branzx.wallet.api.LedgerEntry;
+import dev.branzx.wallet.api.TopupInfo;
+import dev.branzx.wallet.api.TopupSettlement;
 import dev.branzx.wallet.api.WalletApi;
 import dev.branzx.wallet.service.CoinService;
 import dev.branzx.wallet.service.CreditService;
 import dev.branzx.wallet.service.LinkService;
+import dev.branzx.wallet.service.TopupService;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,11 +19,29 @@ final class WalletApiImpl implements WalletApi {
     private final CoinService coins;
     private final CreditService credits;
     private final LinkService links;
+    private final TopupService topups;
 
-    WalletApiImpl(CoinService coins, CreditService credits, LinkService links) {
+    WalletApiImpl(CoinService coins, CreditService credits, LinkService links, TopupService topups) {
         this.coins = coins;
         this.credits = credits;
         this.links = links;
+        this.topups = topups;
+    }
+
+    @Override
+    public boolean createTopup(String reference, UUID owner, long credits,
+                               long amountSatang, String packageId) {
+        return topups.create(reference, owner, credits, amountSatang, packageId);
+    }
+
+    @Override
+    public TopupSettlement settleTopup(String reference, String providerRef) {
+        return topups.settle(reference, providerRef);
+    }
+
+    @Override
+    public TopupInfo topup(String reference) {
+        return topups.get(reference);
     }
 
     @Override

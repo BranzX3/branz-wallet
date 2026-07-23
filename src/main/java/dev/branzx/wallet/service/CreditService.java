@@ -194,6 +194,40 @@ public final class CreditService {
         return new Checkout(true, "Paid " + coinCost + " Coins + " + credits + " Credits.", coinCost, credits);
     }
 
+    /**
+     * Inserts a ledger row and applies a Credit delta on a caller-supplied
+     * connection, so a grant can be enlisted in a larger transaction (e.g. a
+     * top-up settlement that also flips the payment row to PAID in the same
+     * commit). Idempotent via the ledger primary key and floor-guarded — it
+     * throws on a duplicate transaction id or an overdraw so the whole unit
+     * rolls back.
+     */
+    public void applyWithin(Connection connection, UUID owner, long amount,
+                            String type, String transactionId, String detail) throws SQLException {
+        ensureRow(connection, owner, seasonId.get());
+        try (PreparedStatement insert = connection.prepareStatement(
+                "INSERT INTO wallet_credit_ledger "
+                        + "(transaction_id, owner_uuid, entry_type, amount, detail_json) VALUES (?, ?, ?, ?, ?)")) {
+            insert.setString(1, transactionId);
+            insert.setString(2, owner.toString());
+            insert.setString(3, type);
+            insert.setLong(4, amount);
+            insert.setString(5, detail);
+            insert.executeUpdate();
+        }
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE wallet_credit SET credits = credits + ? "
+                        + "WHERE owner_uuid = ? AND credits + ? >= 0")) {
+            update.setLong(1, amount);
+            update.setString(2, owner.toString());
+            update.setLong(3, amount);
+            if (update.executeUpdate() != 1) {
+                throw new SQLException("Insufficient Credits or missing wallet row");
+            }
+        }
+        invalidate(owner);
+    }
+
     /** Most recent ledger entries for {@code owner}, newest first. */
     public List<LedgerEntry> historySync(UUID owner, int limit) {
         List<LedgerEntry> entries = new ArrayList<>();
