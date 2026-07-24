@@ -6,6 +6,7 @@ import dev.branzx.wallet.service.CoinService;
 import dev.branzx.wallet.service.CreditService;
 import dev.branzx.wallet.service.LinkService;
 import dev.branzx.wallet.service.TopupService;
+import dev.branzx.wallet.service.WarehouseService;
 import dev.branzx.wallet.storage.WalletDatabase;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.Command;
@@ -42,8 +43,10 @@ public final class WalletPlugin extends JavaPlugin {
                 () -> getConfig().getString("season.id", "preseason"));
         linkService = new LinkService(this, database);
         TopupService topupService = new TopupService(this, database, creditService);
+        WarehouseService warehouseService = new WarehouseService(this, database);
 
-        WalletApi api = new WalletApiImpl(coinService, creditService, linkService, topupService);
+        WalletApi api = new WalletApiImpl(coinService, creditService, linkService,
+                topupService, warehouseService);
         getServer().getServicesManager().register(WalletApi.class, api, this, ServicePriority.Normal);
 
         registerVault();

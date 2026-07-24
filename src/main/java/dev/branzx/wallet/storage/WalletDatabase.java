@@ -235,6 +235,17 @@ public final class WalletDatabase {
                 KEY idx_topup_owner (owner_uuid)
             )
             """,
+            // One row per material, never a serialised map: a deposit on one
+            // backend and a withdrawal on another then commute instead of
+            // overwriting each other.
+            """
+            CREATE TABLE IF NOT EXISTS wallet_warehouse (
+                owner_uuid VARCHAR(36) NOT NULL,
+                item_key VARCHAR(64) NOT NULL,
+                amount INT NOT NULL DEFAULT 0,
+                PRIMARY KEY (owner_uuid, item_key)
+            )
+            """,
     };
 
     private static final String[] SQLITE_DDL = {
@@ -289,6 +300,14 @@ public final class WalletDatabase {
                 status TEXT NOT NULL DEFAULT 'PENDING',
                 provider_ref TEXT,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS wallet_warehouse (
+                owner_uuid TEXT NOT NULL,
+                item_key TEXT NOT NULL,
+                amount INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (owner_uuid, item_key)
             )
             """,
     };

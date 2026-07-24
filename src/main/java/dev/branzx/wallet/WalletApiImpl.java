@@ -9,6 +9,7 @@ import dev.branzx.wallet.service.CoinService;
 import dev.branzx.wallet.service.CreditService;
 import dev.branzx.wallet.service.LinkService;
 import dev.branzx.wallet.service.TopupService;
+import dev.branzx.wallet.service.WarehouseService;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,12 +21,35 @@ final class WalletApiImpl implements WalletApi {
     private final CreditService credits;
     private final LinkService links;
     private final TopupService topups;
+    private final WarehouseService warehouse;
 
-    WalletApiImpl(CoinService coins, CreditService credits, LinkService links, TopupService topups) {
+    WalletApiImpl(CoinService coins, CreditService credits, LinkService links,
+                  TopupService topups, WarehouseService warehouse) {
         this.coins = coins;
         this.credits = credits;
         this.links = links;
         this.topups = topups;
+        this.warehouse = warehouse;
+    }
+
+    @Override
+    public java.util.Map<String, Integer> warehouseContents(UUID owner) {
+        return warehouse.contents(owner);
+    }
+
+    @Override
+    public int warehouseAmount(UUID owner, String itemKey) {
+        return warehouse.amount(owner, itemKey);
+    }
+
+    @Override
+    public boolean warehouseDeposit(UUID owner, String itemKey, int amount) {
+        return warehouse.deposit(owner, itemKey, amount);
+    }
+
+    @Override
+    public boolean warehouseWithdraw(UUID owner, String itemKey, int amount) {
+        return warehouse.withdraw(owner, itemKey, amount);
     }
 
     @Override

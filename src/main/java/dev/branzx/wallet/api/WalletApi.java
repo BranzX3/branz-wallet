@@ -1,6 +1,7 @@
 package dev.branzx.wallet.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -75,6 +76,24 @@ public interface WalletApi {
      */
     Checkout hybridPay(UUID owner, long coinPrice, long requestedCredits,
                        String purchaseId, String idempotencyKey);
+
+    // ---- shared material warehouse ----
+    //
+    // The bridge between systems: one server produces a material, another
+    // consumes it. Rows are per material and every write is relative, so
+    // deposits and withdrawals from different backends commute.
+
+    /** Everything {@code owner} is holding, by material. */
+    Map<String, Integer> warehouseContents(UUID owner);
+
+    /** How much of one material {@code owner} holds. */
+    int warehouseAmount(UUID owner, String itemKey);
+
+    /** Adds material. Returns whether it committed. */
+    boolean warehouseDeposit(UUID owner, String itemKey, int amount);
+
+    /** Removes material, refusing to go negative. Returns whether it committed. */
+    boolean warehouseWithdraw(UUID owner, String itemKey, int amount);
 
     // ---- real-money top-up orders ----
 
